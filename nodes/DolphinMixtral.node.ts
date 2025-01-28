@@ -60,11 +60,25 @@ export class DolphinMixtral implements INodeType {
                 default: {},
                 options: [
                     {
+                        displayName: 'System Prompt',
+                        name: 'systemPrompt',
+                        type: 'string',
+                        default: 'You are Dolphin, a helpful AI assistant.',
+                        description: 'The system prompt that defines the AI behavior',
+                        typeOptions: {
+                            rows: 4,
+                        },
+                    },
+                    {
                         displayName: 'Temperature',
                         name: 'temperature',
                         type: 'number',
                         default: 0.7,
                         description: 'The sampling temperature to use',
+                        typeOptions: {
+                            minValue: 0,
+                            maxValue: 2,
+                        },
                     },
                     {
                         displayName: 'Max Tokens',
@@ -87,34 +101,58 @@ export class DolphinMixtral implements INodeType {
             const model = this.getNodeParameter('model', i) as string;
             const prompt = this.getNodeParameter('prompt', i) as string;
             const options = this.getNodeParameter('options', i) as {
+                systemPrompt?: string;
                 temperature?: number;
                 maxTokens?: number;
             };
 
             try {
+                // Format the prompt according to ChatML format
+                const formattedPrompt = `<|im_start|>system
+${options.systemPrompt || 'You are Dolphin, a helpful AI assistant.'}<|im_end|>
+<|im_start|>user
+${prompt}<|im_end|>
+<|im_start|>assistant
+`;
+
                 // Make HTTP request to local Ollama instance
                 const response = await this.helpers.request({
                     method: 'POST',
                     url: `${credentials.apiUrl}/api/generate`,
                     body: {
                         model,
-                        prompt,
+                        prompt: formattedPrompt,
                         temperature: options.temperature,
                         max_tokens: options.maxTokens,
+                        stream: false, // Ensure we get a complete response
                     },
                     json: true,
                 });
 
+                // Process the response
                 returnData.push({
                     json: {
-                        response: response.response,
-                        model: model,
-                        prompt: prompt,
-                        ...response, // Include full response data
+                        response: response.response, // The generated text
+                        model,
+                        input: prompt,
+                        metadata: {
+                            total_duration: response.total_duration,
+                            load_duration: response.load_duration,
+                            sample_count: response.sample_count,
+                            sample_duration: response.sample_duration,
+                            prompt_eval_count: response.prompt_eval_count,
+                            prompt_eval_duration: response.prompt_eval_duration,
+                            eval_count: response.eval_count,
+                            eval_duration: response.eval_duration,
+                        }
                     },
                 });
             } catch (error) {
-                throw new NodeOperationError(this.getNode(), `Dolphin Mixtral error: ${error.message}`);
+                throw new NodeOperationError(
+                    this.getNode(),
+                    `Dolphin Mixtral error: ${error.message}`,
+                    { itemIndex: i }
+                );
             }
         }
 
