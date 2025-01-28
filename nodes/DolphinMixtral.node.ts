@@ -112,8 +112,7 @@ export class DolphinMixtral implements INodeType {
 ${options.systemPrompt || 'You are Dolphin, a helpful AI assistant.'}<|im_end|>
 <|im_start|>user
 ${prompt}<|im_end|>
-<|im_start|>assistant
-`;
+<|im_start|>assistant`;
 
                 // Make HTTP request to local Ollama instance
                 const response = await this.helpers.request({
@@ -124,26 +123,36 @@ ${prompt}<|im_end|>
                         prompt: formattedPrompt,
                         temperature: options.temperature,
                         max_tokens: options.maxTokens,
-                        stream: false, // Ensure we get a complete response
+                        stream: false,
+                        raw: true,
                     },
                     json: true,
+                    resolveWithFullResponse: true,
                 });
+
+                // Parse the response properly
+                let responseData;
+                try {
+                    responseData = typeof response.body === 'string' ? JSON.parse(response.body) : response.body;
+                } catch (e) {
+                    responseData = response.body;
+                }
 
                 // Process the response
                 returnData.push({
                     json: {
-                        response: response.response, // The generated text
+                        response: responseData.response, // The generated text
                         model,
                         input: prompt,
                         metadata: {
-                            total_duration: response.total_duration,
-                            load_duration: response.load_duration,
-                            sample_count: response.sample_count,
-                            sample_duration: response.sample_duration,
-                            prompt_eval_count: response.prompt_eval_count,
-                            prompt_eval_duration: response.prompt_eval_duration,
-                            eval_count: response.eval_count,
-                            eval_duration: response.eval_duration,
+                            total_duration: responseData.total_duration,
+                            load_duration: responseData.load_duration,
+                            sample_count: responseData.sample_count,
+                            sample_duration: responseData.sample_duration,
+                            prompt_eval_count: responseData.prompt_eval_count,
+                            prompt_eval_duration: responseData.prompt_eval_duration,
+                            eval_count: responseData.eval_count,
+                            eval_duration: responseData.eval_duration,
                         }
                     },
                 });
