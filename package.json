@@ -1,0 +1,57 @@
+{
+  "name": "n8n-nodes-dolphin-mixtral",
+  "version": "0.1.5",
+  "description": "n8n node to interact with local Ollama models",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "ollama",
+    "ai",
+    "llm",
+    "local-ai"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/henriquemod/n8n-nodes-dolphin-mixtral#readme",
+  "author": {
+    "name": "Henrique Souza",
+    "email": "araujo174@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/henriquemod/n8n-nodes-dolphin-mixtral.git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && gulp build:icons",
+    "dev": "tsc --watch",
+    "format": "prettier nodes credentials --write",
+    "lint": "eslint nodes/**/*.ts credentials/**/*.ts",
+    "lintfix": "eslint nodes/**/*.ts credentials/**/*.ts --fix",
+    "prepublishOnly": "npm run build && npm run lint"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/DolphinMixtralApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/DolphinMixtral.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/request-promise-native": "^1.0.18",
+    "@typescript-eslint/eslint-plugin": "^8.22.0",
+    "@typescript-eslint/parser": "^8.22.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-n8n-nodes-base": "^1.16.3",
+    "gulp": "^5.0.0",
+    "n8n-core": "^1.14.1",
+    "n8n-workflow": "^1.70.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  }
+}
