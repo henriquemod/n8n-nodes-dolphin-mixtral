@@ -16,10 +16,14 @@ export class DolphinMixtralApi implements ICredentialType {
 		},
 		{
 			displayName: 'Model Name',
-			name: 'model',
-			type: 'string',
-			default: 'dolphin-mixtral:latest',
+			description: 'Choose which model to use',
 			required: true,
+			name: 'model',
+			type: 'options',
+			default: 'dolphin-mixtral:latest',
+			options: [
+				{name: 'Dolphin Mixtral', value: 'dolphin-mixtral:latest'},
+			]
 		},
 	];
 }
